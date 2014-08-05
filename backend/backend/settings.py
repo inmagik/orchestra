@@ -39,7 +39,11 @@ INSTALLED_APPS = (
 
     'corsheaders',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+
+    'operations',
+    'workflows',
+    'testops'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -100,3 +104,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     )
 }
+
+BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
+

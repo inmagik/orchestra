@@ -1,0 +1,4 @@
+redis_bin/*
+redis_build/*
+*.rdb
+
