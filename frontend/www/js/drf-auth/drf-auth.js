@@ -2,7 +2,7 @@
 
 'use strict';
 
-angular.module('drfAuth', ['http-auth-interceptor-buffer'])
+angular.module('drfAuth', ['http-auth-interceptor-buffer', 'LocalStorageModule'])
 
 .constant('AUTH_EVENTS', {
     loginSuccess: 'auth-login-success',
@@ -16,8 +16,6 @@ angular.module('drfAuth', ['http-auth-interceptor-buffer'])
     // #TODO: not sure if to keep it
     loginRequired : 'auth-login-required',
 
-    //logout event
-    logoutSuccess : 'auth-logout-success'
 })
 
 
@@ -48,6 +46,15 @@ angular.module('drfAuth', ['http-auth-interceptor-buffer'])
         this.mode = mode;
     };
 
+    
+    this.write = function(){
+
+    };
+
+    this.read = function(){
+
+    }
+
 })
 
 
@@ -66,7 +73,7 @@ angular.module('drfAuth', ['http-auth-interceptor-buffer'])
 .factory('DrfAuthService', ['$rootScope',  '$http', '$q', 'AUTH_EVENTS', 'DrfSession', 'DrfConfig',
     function($rootScope, $http, $q, AUTH_EVENTS, DrfSession, DrfConfig){
 
-        var svc = {};
+        var svc = { autologin : true };
         var loginUrl = DrfConfig.loginUrl;
 
         var csrfToken = null;
@@ -155,6 +162,22 @@ angular.module('drfAuth', ['http-auth-interceptor-buffer'])
             console.log(DrfSession.sessionData)
             return !!DrfSession.sessionData;
         };
+
+
+        svc.loaded = true;
+        if(svc.autoLogin){
+          //try to login
+          //...
+          svc.loaded = true;
+
+
+        } else {
+
+
+
+        }
+
+
 
         return svc;
 

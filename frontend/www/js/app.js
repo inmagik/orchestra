@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-  angular.module('Orchestra', ['ui.router', 'drfAuth'])
+  angular.module('Orchestra', ['ui.router', 'drfAuth', 'LocalStorageModule'])
 
   .config(['$httpProvider', 'DrfConfigProvider', '$stateProvider', '$urlRouterProvider',
     function($httpProvider, DrfConfigProvider, $stateProvider, $urlRouterProvider) {
@@ -46,7 +46,7 @@
   .run(function ($rootScope, AUTH_EVENTS, DrfAuthService) {
 
       $rootScope.$on('$stateChangeStart', function (event, next) {
-          
+
           if(!next.data){
             return;
           }
