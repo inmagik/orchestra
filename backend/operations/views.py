@@ -6,7 +6,9 @@ from rest_framework.response import Response
 from rest_framework import authentication, permissions
 from rest_framework.exceptions import APIException
 
-from core import register
+from orchestra_core import op_register as register
+from operations.utils import run_operation
+
 from .serializers import OperationSerializer
 from .models import Operation
 import json
@@ -31,13 +33,16 @@ class CreateOperation(APIView):
     def post(self, request, format=None):
         
         name = request.DATA.get('name')
+        assigned_id = request.DATA.get('assigned_id')
+        partials = request.DATA.get('partials')
+
         if not name:
             raise APIException("No name provided. You must provide an operation name")
 
         if name not in register.meta:
             raise APIException("The operation %s is unknown" % name)            
 
-        op = Operation(name=name, owner=request.user)
+        op = Operation(name=name, owner=request.user, assigned_id=assigned_id, partials=partials)
         op.save()
         
         return Response(OperationSerializer(op).data)
@@ -58,26 +63,7 @@ class RunOperation(APIView):
         if op.task and not force:
             raise APIException("This operation has already run")
         
-        #let's check arguments
-        meta = register.meta[op.name]
-        args = []
-        args_not_found = []
-        for arg in meta['args']:
-            if arg not in request.DATA:
-                args_not_found.append(arg)
-            else:
-                args.append(request.DATA[arg])
-
-        if args_not_found:
-            raise APIException("Missing arguments, %s" % ','.join(args_not_found))    
-
-        task = register.reg[op.name]
-        run_args = {'args' : args}
-        res = task.apply_async(args)
-        task_id = res.task_id
-        op.task = task_id
-        op.args = json.dumps(run_args)
-        op.save()
+        run_operation(op, request.DATA)
         
         return Response(OperationSerializer(op).data)
 
