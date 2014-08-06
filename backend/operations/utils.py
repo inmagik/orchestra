@@ -75,7 +75,7 @@ def run_operation(op, data):
     task = op_register.reg[op.name]
     run_args = {'args' : args}
     
-    res = task.apply_async(args, task_id = op.assigned_id)
+    res = task.apply_async(args, task_id = op.oid)
     task_id = res.task_id
     op.task = task_id
     op.args = json.dumps(run_args)
@@ -86,9 +86,9 @@ def run_operation(op, data):
 
 class ConnectedWorkflow(object):
 
-    def __init__(self, name=None, assigned_id=None, create_function=None):
+    def __init__(self, name=None, oid=None, create_function=None):
         self.name = name
-        self.assigned_id = assigned_id or generate_uuid()
+        self.oid = oid or generate_uuid()
         
         self.ops = []
         self.ops_ids = {}
@@ -100,20 +100,20 @@ class ConnectedWorkflow(object):
 
     def get_operation(self, name):
         #op_fun = op_register.get_function(name)
-        op = Operation(name=name, assigned_id=generate_uuid())
+        op = Operation(name=name, oid=generate_uuid())
         op.partials = {}
         return op
 
     def add_operation(self, op):
         self.ops.append(op)
         #TODO: check assigned ids
-        self.ops_ids[op.assigned_id] = True
+        self.ops_ids[op.oid] = True
         if op.name not in self.ops_names:
 
             self.ops_names[op.name] = 0;
         self.ops_names[op.name] += 1;
 
-        self.ops_keys[op.assigned_id] = op.name + "_" + str(self.ops_names[op.name])
+        self.ops_keys[op.oid] = op.name + "_" + str(self.ops_names[op.name])
 
 
     def connect(self, op1, op2, connector):
@@ -125,9 +125,9 @@ class ConnectedWorkflow(object):
         save all operations and the workflow
         """
         try:
-            workflow = Workflow.objects.get(assigned_id=self.assigned_id)
+            workflow = Workflow.objects.get(oid=self.oid)
         except Workflow.DoesNotExist:
-            workflow = Workflow(name=self.name, assigned_id=self.assigned_id, **model_kwargs)
+            workflow = Workflow(name=self.name, oid=self.oid, **model_kwargs)
             workflow.save()
 
         for op in self.ops:
@@ -143,11 +143,11 @@ class ConnectedWorkflow(object):
         for op in self.ops:
             #filtering run operations
             
-            if op.task and op.assigned_id not in rerun:
+            if op.task and op.oid not in rerun:
                 continue
 
-            if op.assigned_id in data:
-                op_data = data[op.assigned_id]
+            if op.oid in data:
+                op_data = data[op.oid]
             else:
                 op_data = {}
             x = missing_args(op, op_data)
@@ -155,7 +155,7 @@ class ConnectedWorkflow(object):
             if not x:
                 out.append(op)
             else:
-                missing[op.assigned_id] = x
+                missing[op.oid] = x
 
         return out, missing
 
@@ -168,7 +168,7 @@ class ConnectedWorkflow(object):
         print "o", self.ops_names
 
         for op in self.ops:
-            op_key = self.ops_keys[op.assigned_id]
+            op_key = self.ops_keys[op.oid]
             partials = op.partials or {}
             out_partials = {}
             for k in partials:
@@ -190,7 +190,7 @@ class ConnectedWorkflow(object):
 
 
     def load(self):
-        wf = Workflow.objects.get(assigned_id=self.assigned_id)
+        wf = Workflow.objects.get(oid=self.oid)
         self.ops = wf.operations.all()
         self.name = wf.name
         return wf
@@ -220,23 +220,23 @@ def load_workflow(wf_id):
     """
    
     """
-    w = ConnectedWorkflow(assigned_id=wf_id)
+    w = ConnectedWorkflow(oid=wf_id)
     w.load()
     return w
 
 
 
 def run_workflow(wf_id, data={}, rerun=[]):
-    w = ConnectedWorkflow(assigned_id=wf_id)
+    w = ConnectedWorkflow(oid=wf_id)
     wf = w.load()
     rops, missing = w.get_runnable_ops(data, rerun=rerun)
-    xops = [x.assigned_id for x in w.ops if x.task and x.assigned_id not in rerun]
+    xops = [x.oid for x in w.ops if x.task and x.oid not in rerun]
     run_ops = []
     if rops:
         for r in rops:
-            op_data = data.get(r.assigned_id,{})
+            op_data = data.get(r.oid,{})
             run_operation(r, op_data)
-            run_ops.append(r.assigned_id)
+            run_ops.append(r.oid)
 
     return {"just_run" : run_ops, "missing_args" : missing, "previously_run" : xops}
 

@@ -31,7 +31,7 @@ class OperationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Operation
-        fields = ('id', 'name', 'task', 'owner', 'task_result', 'task_state', 'args', 'expected_args',  'partials', "assigned_id")
+        fields = ('id', 'name', 'task', 'owner', 'task_result', 'task_state', 'args', 'expected_args',  'partials', "oid")
 
 
 
@@ -43,7 +43,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
 
     def get_pending_operations(self, obj):
         ops = obj.operations.all()
-        return [x.assigned_id for x in ops if not x.task]
+        return [x.oid for x in ops if not x.task]
 
 
 

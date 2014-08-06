@@ -35,7 +35,7 @@ class CreateOperation(APIView):
     def post(self, request, format=None):
         
         name = request.DATA.get('name')
-        assigned_id = request.DATA.get('assigned_id')
+        oid = request.DATA.get('oid')
         partials = request.DATA.get('partials')
 
         if not name:
@@ -44,7 +44,7 @@ class CreateOperation(APIView):
         if name not in register.meta:
             raise APIException("The operation %s is unknown" % name)            
 
-        op = Operation(name=name, owner=request.user, assigned_id=assigned_id, partials=partials)
+        op = Operation(name=name, owner=request.user, oid=oid, partials=partials)
         op.save()
         
         return Response(OperationSerializer(op).data)
@@ -117,7 +117,7 @@ class RunWorkflow (APIView):
             raise APIException("No valid WorkFlow found")
 
         
-        run_ops = run_workflow(wf.assigned_id, data, rerun=rerun)
+        run_ops = run_workflow(wf.oid, data, rerun=rerun)
         
         return Response(run_ops)
 
@@ -127,7 +127,7 @@ class CreateWorkflow(APIView):
     def post(self, request, format=None):
         
         name = request.DATA.get('name')
-        assigned_id = request.DATA.get('assigned_id')
+        oid = request.DATA.get('oid')
         
         if not name:
             raise APIException("No name provided. You must provide a workflow name")

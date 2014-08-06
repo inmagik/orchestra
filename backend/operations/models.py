@@ -9,13 +9,7 @@ class Workflow(models.Model):
     
     owner = models.ForeignKey(User, null=True, blank=True)
     name = models.CharField(max_length=200)
-    assigned_id = models.CharField(max_length=200, null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        if not self.assigned_id:
-            self.assigned_id = generate_uuid()
-
-        super(Workflow, self).save(*args, **kwargs)
+    oid = models.CharField(max_length=200, null=True, blank=True, default=generate_uuid)
 
 
 class Operation(models.Model):
@@ -28,7 +22,7 @@ class Operation(models.Model):
     args = JSONField(null=True, blank=True)
 
     partials = JSONField(null=True, blank=True)
-    assigned_id = models.CharField(max_length=200, null=True, blank=True)
+    oid = models.CharField(max_length=200, null=True, blank=True)
 
     workflow = models.ForeignKey(Workflow, null=True, blank=True, related_name="operations")
 
