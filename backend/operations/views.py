@@ -7,10 +7,12 @@ from rest_framework import authentication, permissions
 from rest_framework.exceptions import APIException
 
 from orchestra_core import op_register as register
-from operations.utils import run_operation
+from orchestra_core import wf_register
 
-from .serializers import OperationSerializer
-from .models import Operation
+from operations.utils import run_operation, run_workflow, get_workflow_meta, create_workflow
+
+from .serializers import OperationSerializer, WorkflowSerializer
+from .models import Operation, Workflow
 import json
 
 class ListOperations(APIView):
@@ -77,3 +79,73 @@ class OperationStatus(APIView):
             raise APIException("Operation not found")
 
         return  Response(OperationSerializer(op).data)
+
+
+
+
+
+class ListWorkflows(APIView):
+    """
+    Lists all available wf
+    """
+    #authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, format=None):
+        """
+        Return a list of all registered operations.
+        """
+        wfs = wf_register.reg.keys()
+        out = []
+        for w in wfs:
+            out.append(get_workflow_meta(w))
+        return Response(out)
+
+
+
+class RunWorkflow (APIView):
+    
+    def post(self, request, format=None):
+        
+        id = request.DATA.get('id')
+        data = request.DATA.get('data', {})
+        rerun = request.DATA.get('rerun', [])
+        
+        try:
+            wf = Workflow.objects.get(pk=int(id))
+        except Exception, e:
+            raise APIException("No valid WorkFlow found")
+
+        
+        run_ops = run_workflow(wf.assigned_id, data, rerun=rerun)
+        
+        return Response(run_ops)
+
+
+class CreateWorkflow(APIView):
+    
+    def post(self, request, format=None):
+        
+        name = request.DATA.get('name')
+        assigned_id = request.DATA.get('assigned_id')
+        
+        if not name:
+            raise APIException("No name provided. You must provide a workflow name")
+
+        if name not in wf_register.reg:
+            raise APIException("The workflow %s is unknown" % name)            
+
+        wf = create_workflow(name=name, owner=request.user)
+        
+        return Response(WorkflowSerializer(wf).data)
+
+
+class WorkflowStatus(APIView):
+
+    def get(self, request, pk, format=None):
+        try:
+            op = Workflow.objects.get(pk=pk)
+        except Workflow.DoesNotExist:
+            raise APIException("Workflow not found")
+
+        return  Response(WorkflowSerializer(op).data)

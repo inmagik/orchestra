@@ -1,8 +1,8 @@
 
 
-def simple_connector(to):
+def simple_celery_connector(to):
     def connect(a,b):
-        a.partials = a.partials or {}
-        a.partials[to] = b.assigned_id
+        b.partials = b.partials or {}
+        b.partials[to] = {'backend' : 'celery', 'id' : a.assigned_id}
 
     return connect

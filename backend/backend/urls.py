@@ -3,6 +3,7 @@ from django.contrib import admin
 from rest_framework import routers
 from procrunner import views
 from operations.views import ListOperations, CreateOperation, RunOperation, OperationStatus
+from operations.views import ListWorkflows, CreateWorkflow, RunWorkflow, WorkflowStatus
 
 
 router = routers.DefaultRouter()
@@ -15,13 +16,19 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'backend.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
-    url(r'^api/self/', views.CurrentUserView.as_view(), name="self"),
+    url(r'^api/self/$', views.CurrentUserView.as_view(), name="self"),
 
-    url(r'^api/ops/create', CreateOperation.as_view(), name="create_operation"),
-    url(r'^api/ops/run', RunOperation.as_view(), name="run_operation"),
-    url(r'^api/ops/status/(?P<pk>\d)/$', OperationStatus.as_view(), name="operation_status"),
+    url(r'^api/ops/create/$', CreateOperation.as_view(), name="create_operation"),
+    url(r'^api/ops/run/$', RunOperation.as_view(), name="run_operation"),
+    url(r'^api/ops/status/(?P<pk>[0-9]+)/$', OperationStatus.as_view(), name="operation_status"),
 
     url(r'^api/operations/', ListOperations.as_view(), name="operations"),
+
+
+    url(r'^api/wf/create/$', CreateWorkflow.as_view(), name="create_workflow"),
+    url(r'^api/wf/run/$', RunWorkflow.as_view(), name="run_workflow"),
+    url(r'^api/wf/status/(?P<pk>[0-9]+)/$', WorkflowStatus.as_view(), name="workflow_status"),    
+    url(r'^api/workflows/', ListWorkflows.as_view(), name="workflows"),
 
 
 
