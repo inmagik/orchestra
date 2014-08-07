@@ -189,7 +189,7 @@ class ConnectedWorkflow(object):
             out_partials = {}
             for k in partials:
                 p = partials[k]
-                if 'backend' in p:
+                if type(p) == dict and 'backend' in p:
                     op_name = self.ops_keys[p['id']]
                     out_partials[k] = "from:"+op_name
                 else:

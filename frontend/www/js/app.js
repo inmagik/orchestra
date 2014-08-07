@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-  angular.module('Orchestra', ['ui.router', 'drfAuth', 'LocalStorageModule'])
+  angular.module('Orchestra', ['ui.router', 'drfAuth', 'LocalStorageModule', 'OrchestraServer'])
 
   .config(['$httpProvider', 'DrfConfigProvider', '$stateProvider', '$urlRouterProvider',
     function($httpProvider, DrfConfigProvider, $stateProvider, $urlRouterProvider) {
@@ -15,19 +15,26 @@
 
 
       //ROUTER CONFIGURATION
-      $urlRouterProvider.otherwise("/state1");
+      $urlRouterProvider.otherwise("/dashboard");
 
       // Now set up the states
       $stateProvider
-        .state('state1', {
-          url: "/state1",
-          templateUrl: "templates/state1.html"
+        .state('dashboard', {
+          url: "/dashboard",
+          templateUrl: "templates/dashboard.html"
         })
 
-        .state('state2', {
-          url: "/state2",
-          templateUrl: "templates/state2.html",
-          data : { requiresAuth : true}
+        .state('meta_workflows', {
+          url: "/meta-workflows",
+          templateUrl: "templates/meta_workflows.html",
+          controller  :'WfMetaCtrl',
+          //data : { requiresAuth : true},
+          resolve  : {
+            workflows : function(orchestraServer){
+              return orchestraServer.getMetaWorkflows();
+            }
+
+          }
         })
 
         .state('login', {

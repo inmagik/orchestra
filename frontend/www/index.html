@@ -5,6 +5,9 @@
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
     <title></title>
 
+    
+
+    
     <link href="css/style.less" rel="stylesheet/less">
 
 
@@ -13,35 +16,149 @@
   </head>
   <body ng-app="Orchestra" ng-controller="AppCtrl">
 
+    
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header ">
+                <button class="btn navbar-btn pull-left" id="menu-toggle">O</button>&nbsp;&nbsp;
+                
+                <div class="clearfix"></div>
+            </div>  
+            
+
+            
+
+        </div>
+        
+    </div>
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <div class="sidebar-nav">
+
+                <div class="list-group">
+                    <a ui-sref="dashboard" class="list-group-item">
+                        Dashboard    
+                    </a>
+                    <a class="list-group-item disabled">
+                        Server Metadata
+                    </a>
+                    <a ui-sref="meta_workflows" class="list-group-item">
+                        Registered Workflows
+                    </a>
+                    <a href="#" class="list-group-item">
+                        Registered Operations
+                    </a>
+
+                    <a href="#" class="list-group-item disabled">
+                        Management
+                    </a>
+                    <a href="#" class="list-group-item">
+                        Workflows
+                    </a>
+                    <a href="#" class="list-group-item">
+                        Operations
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper" ui-view>
+            
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!--
+
+
+
     <div login-dialog class="hide"></div>
     <div>
       <div>Username : {{user.username}}</div>
     </div>
 
     <div ui-view></div>
-    <!-- We'll also add some navigation: -->
     <a ui-sref="state1">State 1</a>
     <a ui-sref="state2">State 2</a>
 
-    <!-- your app's js -->
+    -->
+
+    
     <!--<script src="lib/d3/d3.min.js"></script>-->
     <script src="lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="lib/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <!-- Menu Toggle Script -->
+    <!-- MOVE TO ANGULAR! -->
+    <script>
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+    </script>
+
     <script src="lib/angular/angular.min.js"></script>
     <script src="lib/angular-ui-router/release/angular-ui-router.min.js"></script>
 
     <script src="lib/angular-local-storage/angular-local-storage.min.js"></script>
 
     
+    <!-- set options before less.js script -->
+<script>
+  less = {
+    
+    logLevel: 1
+    
+    
+  };
+</script>
 
     <script src="lib/less/dist/less-1.7.4.min.js"></script>
     <script src="lib/moment/min/moment-with-locales.min.js"></script>
     <script src="lib/underscore/underscore.js"></script>
 
     <script src="js/drf-auth/drf-auth.js"></script>
+    <script src="js/services/orchestra-server.js"></script>
+    
     <script src="js/app.js"></script>
 
     <script src="js/directives/login-dialog.js"></script>
     <script src="js/controllers/app-ctrl.js"></script>
+    <script src="js/controllers/wfmetactrl.js"></script>
     
   </body>
 </html>
