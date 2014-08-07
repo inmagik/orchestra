@@ -3,7 +3,7 @@ from django.contrib import admin
 from rest_framework import routers
 from procrunner import views
 from operations.views import ListOperations, CreateOperation, RunOperation, OperationStatus
-from operations.views import ListWorkflows, CreateWorkflow, RunWorkflow, WorkflowStatus
+from operations.views import ListWorkflows, CreateWorkflow, RunWorkflow, WorkflowStatus,ResetWorkflow
 
 
 router = routers.DefaultRouter()
@@ -26,8 +26,15 @@ urlpatterns = patterns('',
 
 
     url(r'^api/wf/create/$', CreateWorkflow.as_view(), name="create_workflow"),
+    
+    url(r'^api/wf/run/(?P<pk>[0-9]+)/$', RunWorkflow.as_view(), name="run_workflow_id"),
     url(r'^api/wf/run/$', RunWorkflow.as_view(), name="run_workflow"),
+    
+    url(r'^api/wf/reset/(?P<pk>[0-9]+)/$', ResetWorkflow.as_view(), name="reset_workflow"),
+    url(r'^api/wf/reset/$', ResetWorkflow.as_view(), name="reset_workflow_id"),
+
     url(r'^api/wf/status/(?P<pk>[0-9]+)/$', WorkflowStatus.as_view(), name="workflow_status"),    
+    
     url(r'^api/workflows/', ListWorkflows.as_view(), name="workflows"),
 
 

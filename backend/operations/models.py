@@ -21,10 +21,20 @@ class Operation(models.Model):
     task = models.CharField(max_length=200, null=True, blank=True)
     args = JSONField(null=True, blank=True)
 
+
+
     partials = JSONField(null=True, blank=True)
     oid = models.CharField(max_length=200, null=True, blank=True)
 
     workflow = models.ForeignKey(Workflow, null=True, blank=True, related_name="operations")
+
+    #execution data
+    last_run = models.DateTimeField(null=True, blank=True)
+    last_run_ok = models.NullBooleanField(null=True, blank=True)
+    last_exception = models.TextField(null=True, blank=True)
+
+
+
 
 
 

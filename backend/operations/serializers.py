@@ -31,7 +31,8 @@ class OperationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Operation
-        fields = ('id', 'name', 'task', 'owner', 'task_result', 'task_state', 'args', 'expected_args',  'partials', "oid")
+        fields = ('id', 'name', 'task', 'owner', 'task_result', 'task_state', 'args', 'expected_args',  'partials', 'oid',
+                'last_run', 'last_run_ok', 'last_exception')
 
 
 

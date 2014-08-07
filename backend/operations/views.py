@@ -9,7 +9,7 @@ from rest_framework.exceptions import APIException
 from orchestra_core import op_register as register
 from orchestra_core import wf_register
 
-from operations.utils import run_operation, run_workflow, get_workflow_meta, create_workflow
+from operations.utils import run_operation, run_workflow, get_workflow_meta, create_workflow, reset_workflow
 
 from .serializers import OperationSerializer, WorkflowSerializer
 from .models import Operation, Workflow
@@ -105,11 +105,19 @@ class ListWorkflows(APIView):
 
 class RunWorkflow (APIView):
     
-    def post(self, request, format=None):
+    def post(self, request, pk=None, format=None):
         
-        id = request.DATA.get('id')
-        data = request.DATA.get('data', {})
-        rerun = request.DATA.get('rerun', [])
+        if not pk:
+            id = request.DATA.get('id')
+        else:
+            id = pk
+
+        try:
+            req_data = request.DATA
+        except:
+            req_data = {}
+        data = req_data.get('data', {})
+        rerun = req_data.get('rerun', [])
         
         try:
             wf = Workflow.objects.get(pk=int(id))
@@ -117,9 +125,29 @@ class RunWorkflow (APIView):
             raise APIException("No valid WorkFlow found")
 
         
-        run_ops = run_workflow(wf.oid, data, rerun=rerun)
+        run_ops = run_workflow(wf, data, rerun=rerun)
         
         return Response(run_ops)
+
+
+class ResetWorkflow (APIView):
+    
+    def post(self, request, pk=None, format=None):
+        
+        if not pk:
+            id = request.DATA.get('id')
+        else:
+            id = pk
+        
+        try:
+            wf = Workflow.objects.get(pk=int(id))
+        except Exception, e:
+            raise APIException("No valid WorkFlow found")
+
+        
+        reset_workflow(wf)
+        
+        return Response(WorkflowSerializer(wf).data)
 
 
 class CreateWorkflow(APIView):
