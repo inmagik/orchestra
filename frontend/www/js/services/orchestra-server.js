@@ -30,13 +30,31 @@ angular.module('OrchestraServer', [])
         return deferred.promise;
     };
 
+   
+
+
     svc.getMetaWorkflows = function(){
         return simpleGet("api/metaworkflows/")
+    };
+
+
+    svc.getMetaWorkflow = function(name){
+        return simpleGet("api/metaworkflows/" + name + "/")
     };
 
     svc.getWorkflows = function(){
         return simpleGetDrfList("api/workflows/")
     };
+
+    svc.getWorkflow = function(id){
+        return simpleGet("api/workflows/" + id + "/")
+    };
+
+    svc.createWorkflow = function(name){
+        var url = svc.baseUrl + 'api/wf/create/'
+        return $http.post(url, { name:name});
+
+    }
 
 
     return svc;

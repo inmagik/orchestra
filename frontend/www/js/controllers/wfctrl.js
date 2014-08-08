@@ -6,8 +6,16 @@ angular.module('Orchestra')
     function($scope, workflows) {
 
         $scope.workflows = workflows;
-        console.log($scope.workflows);
+        
 
+
+    }])
+
+.controller('WfCtrlSingle', ['$scope', 'workflow',
+    function($scope, workflow) {
+
+        $scope.workflow = workflow;
+        
 
 
     }]);

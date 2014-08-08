@@ -3,14 +3,14 @@
 
     <div class="list-group">
         <div class="list-group-item" ng-repeat="workflow in workflows">
-            {{workflow.name }} - {{workflow.oid}}
+            <a ui-sref="workflows.detail({ id: workflow.oid })">
+                {{workflow.name}} - {{workflow.oid}}
+            </a>
 
-            <div class="wf-diagram" wf-diagram metawf="workflow">
-                
-
-            </div>
 
         </div>
+
+        
         
     </div>
 

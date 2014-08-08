@@ -34,7 +34,7 @@
                     <a class="list-group-item disabled">
                         Server Metadata
                     </a>
-                    <a ui-sref="meta_workflows" class="list-group-item">
+                    <a ui-sref="metaworkflows.list" class="list-group-item" ui-sref-active="active">
                         Registered Workflows
                     </a>
                     <a href="#" class="list-group-item">
@@ -44,7 +44,7 @@
                     <a href="#" class="list-group-item disabled">
                         Management
                     </a>
-                    <a ui-sref="workflows" class="list-group-item">
+                    <a ui-sref="workflows.list" class="list-group-item" ui-sref-active="active">
                         Workflows
                     </a>
                     <a href="#" class="list-group-item">
@@ -58,7 +58,7 @@
         <!-- /#sidebar-wrapper -->
 
         <!-- Page Content -->
-        <div id="page-content-wrapper" ui-view>
+        <div id="page-content-wrapper" ui-view class="animated-view">
             
         </div>
         <!-- /#page-content-wrapper -->
@@ -122,6 +122,7 @@
     </script>
 
     <script src="lib/angular/angular.min.js"></script>
+    <script src="lib/angular-animate/angular-animate.min.js"></script>
     <script src="lib/angular-ui-router/release/angular-ui-router.min.js"></script>
 
     <script src="lib/angular-local-storage/angular-local-storage.min.js"></script>

@@ -4,7 +4,7 @@ from rest_framework import routers
 from procrunner import views
 
 from operations.views import ListOperations, CreateOperation, RunOperation, OperationStatus
-from operations.views import ListWorkflows, CreateWorkflow, RunWorkflow, WorkflowStatus,ResetWorkflow
+from operations.views import MetaWorkflows, MetaWorkflow, CreateWorkflow, RunWorkflow, WorkflowStatus,ResetWorkflow
 from operations.views import WorkflowViewSet, OperationViewSet
 
 router = routers.DefaultRouter()
@@ -38,7 +38,8 @@ urlpatterns = patterns('',
 
     url(r'^api/wf/status/(?P<pk>[0-9]+)/$', WorkflowStatus.as_view(), name="workflow_status"),    
     
-    url(r'^api/metaworkflows/', ListWorkflows.as_view(), name="workflows"),
+    url(r'^api/metaworkflows/(?P<name>\w+)/$', MetaWorkflow.as_view(), name="metaworkflow"),
+    url(r'^api/metaworkflows/', MetaWorkflows.as_view(), name="metaworkflows"),
 
 
 

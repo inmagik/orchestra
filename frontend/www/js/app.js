@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-  angular.module('Orchestra', ['ui.router', 'drfAuth', 'LocalStorageModule', 'OrchestraServer'])
+  angular.module('Orchestra', ['ngAnimate',  'ui.router', 'drfAuth', 'LocalStorageModule', 'OrchestraServer'])
 
   .config(['$httpProvider', 'DrfConfigProvider', '$stateProvider', '$urlRouterProvider',
     function($httpProvider, DrfConfigProvider, $stateProvider, $urlRouterProvider) {
@@ -15,6 +15,7 @@
 
 
       //ROUTER CONFIGURATION
+
       $urlRouterProvider.otherwise("/dashboard");
 
       // Now set up the states
@@ -24,9 +25,9 @@
           templateUrl: "templates/dashboard.html"
         })
 
-        .state('meta_workflows', {
-          url: "/meta-workflows",
-          templateUrl: "templates/meta_workflows.html",
+        .state('metaworkflows', {
+          abstract : true,
+          template : '<div class="ui-view animated-view"></div>',
           controller  :'WfMetaCtrl',
           //data : { requiresAuth : true},
           resolve  : {
@@ -35,11 +36,30 @@
             }
 
           }
+
         })
 
+        .state('metaworkflows.list', {
+          url : '/metaworkflows',
+          templateUrl: "templates/metaworkflows.html"
+          
+        })
+
+        .state('metaworkflows.detail', {
+          url: "/metaworkflows/:name",
+          templateUrl: "templates/metaworkflow.html",
+          controller : 'WfMetaCtrlSingle',
+          resolve  : {
+            workflow : function($stateParams, orchestraServer){
+              return orchestraServer.getMetaWorkflow($stateParams.name);
+            }
+          }
+        })
+
+
         .state('workflows', {
-          url: "/workflows",
-          templateUrl: "templates/workflows.html",
+          abstract : true,
+          template : '<div class="ui-view animated-view"></div>',
           controller  :'WfCtrl',
           //data : { requiresAuth : true},
           resolve  : {
@@ -48,6 +68,25 @@
             }
 
           }
+
+        })
+        
+        .state('workflows.list', {
+          url: "/workflows",
+          templateUrl: "templates/workflows.html",
+          
+        })
+
+
+        .state('workflows.detail', {
+          url: "/workflows/:id",
+          templateUrl: "templates/workflow.html",
+          controller : 'WfCtrlSingle',
+          resolve  : {
+            workflow : function($stateParams, orchestraServer){
+              return orchestraServer.getWorkflow($stateParams.id);
+            }
+          }
         })
 
         .state('login', {
@@ -55,6 +94,9 @@
           templateUrl: "templates/login.html",
           data : { requiresAuth : true}
         });
+
+
+        
 
     }
 

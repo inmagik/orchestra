@@ -84,7 +84,7 @@ class OperationStatus(APIView):
 
 
 
-class ListWorkflows(APIView):
+class MetaWorkflows(APIView):
     """
     Lists all available wf
     """
@@ -102,8 +102,25 @@ class ListWorkflows(APIView):
         return Response(out)
 
 
+class MetaWorkflow(APIView):
+    """
+    Lists all available wf
+    """
+    #authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, name, format=None):
+        """
+        Return a list of all registered operations.
+        """
+        out = get_workflow_meta(name)
+        return Response(out)
+
+
 
 class RunWorkflow (APIView):
+
+    permission_classes = (permissions.AllowAny,)
     
     def post(self, request, pk=None, format=None):
         
@@ -131,6 +148,8 @@ class RunWorkflow (APIView):
 
 
 class ResetWorkflow (APIView):
+
+    permission_classes = (permissions.AllowAny,)
     
     def post(self, request, pk=None, format=None):
         
@@ -150,6 +169,8 @@ class ResetWorkflow (APIView):
 
 
 class CreateWorkflow(APIView):
+
+    permission_classes = (permissions.AllowAny,)
     
     def post(self, request, format=None):
         
@@ -169,6 +190,8 @@ class CreateWorkflow(APIView):
 
 class WorkflowStatus(APIView):
 
+    permission_classes = (permissions.AllowAny,)
+
     def get(self, request, pk, format=None):
         try:
             op = Workflow.objects.get(pk=pk)
@@ -181,7 +204,7 @@ class WorkflowStatus(APIView):
 
 
 from rest_framework import viewsets
-
+from django.shortcuts import get_object_or_404
 
 class WorkflowViewSet(viewsets.ModelViewSet):
     """
@@ -190,6 +213,13 @@ class WorkflowViewSet(viewsets.ModelViewSet):
     queryset = Workflow.objects.all()
     serializer_class = WorkflowSerializer
     permission_classes = (permissions.AllowAny,)
+
+
+    def retrieve(self, request, pk=None):
+        queryset = Workflow.objects.all()
+        obj = queryset.get(oid=pk)
+        serializer = self.serializer_class(obj)
+        return Response(serializer.data)
 
 
 class OperationViewSet(viewsets.ModelViewSet):
