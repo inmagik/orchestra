@@ -103,7 +103,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-    )
+    ),
+    
+    'DEFAULT_PAGINATION_SERIALIZER_CLASS': 'operations.pagination.PaginationSerializerWithPageNo',
 }
 
 BROKER_URL = 'redis://localhost:6379/0'

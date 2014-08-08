@@ -1,17 +1,31 @@
 <div class="container-fluid">
     <h2>Workflows</h2>
 
+
     <div class="list-group">
         <div class="list-group-item" ng-repeat="workflow in workflows">
             <a ui-sref="workflows.detail({ id: workflow.oid })">
                 {{workflow.name}} - {{workflow.oid}}
             </a>
-
-
         </div>
-
-        
-        
     </div>
+
+    
+    
+    <div class="alert alert-info text-center">
+        
+        
+    
+
+    <ul class="pagination">
+    <li ng-if="workflowsData.previous"><a ng-click="loadPage(workflowsData.previous)">&laquo;</a></li>
+  
+    <li class="active"><a> page {{ workflowsData.page_no }}</a></li>
+    <li ng-if="workflowsData.next"><a ng-click="loadPage(workflowsData.next)">&raquo;</a></li>
+    </ul>
+
+    </div>
+
+    
 
 </div>

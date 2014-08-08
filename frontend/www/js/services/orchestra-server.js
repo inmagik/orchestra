@@ -10,15 +10,19 @@ angular.module('OrchestraServer', [])
     var svc = {};
     svc.baseUrl = "http://localhost:8000/"
 
-    var simpleGet = function(url){
+    var simpleGet = function(url, append){
         var deferred = $q.defer();
-        var url = svc.baseUrl + url;
+        if(append !== false){
+            var url = svc.baseUrl + url;
+        }
         $http.get(url).then(function(resp){
             deferred.resolve(resp.data);
             console.log("x", resp.data)
         });
         return deferred.promise;
     };
+
+    svc.simpleGet = simpleGet;
 
     var simpleGetDrfList = function(url){
         var deferred = $q.defer();
@@ -43,7 +47,7 @@ angular.module('OrchestraServer', [])
     };
 
     svc.getWorkflows = function(){
-        return simpleGetDrfList("api/workflows/")
+        return simpleGet("api/workflows/")
     };
 
     svc.getWorkflow = function(id){
