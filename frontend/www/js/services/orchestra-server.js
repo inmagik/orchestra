@@ -58,7 +58,13 @@ angular.module('OrchestraServer', [])
         var url = svc.baseUrl + 'api/wf/create/'
         return $http.post(url, { name:name});
 
-    }
+    };
+
+    svc.runOperation = function(id){
+        var url = svc.baseUrl + 'api/ops/run/'
+        return $http.post(url, { id:id});
+
+    };
 
 
     return svc;

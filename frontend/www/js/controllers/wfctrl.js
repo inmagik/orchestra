@@ -26,6 +26,8 @@ angular.module('Orchestra')
             return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
         }
 
+
+
         $scope.loadPage = function(url){
             if(!url){return}
             orchestraServer.simpleGet(url, false).then(function(resp){
@@ -41,10 +43,30 @@ angular.module('Orchestra')
 
     }])
 
-.controller('WfCtrlSingle', ['$scope', 'workflow',
-    function($scope, workflow) {
+.controller('WfCtrlSingle', ['$scope', 'workflow', 'orchestraServer',
+    function($scope, workflow, orchestraServer) {
 
         $scope.workflow = workflow;
+        console.log("xxx", workflow)
+
+        $scope.runOperation = function(id){
+            console.log("running operation!", id);
+            orchestraServer.runOperation(id).then(function(resp){
+                console.log("operation run!", resp);
+            })
+        };
+
+        $scope.isPending = function(oid){
+            return ($scope.workflow.pending_operations.indexOf(oid) != -1)
+        }
+        /*
+        $scope.resetOperation = function(id){
+            console.log("running operation!", id);
+            orchestraServer.runOperation(id).then(function(resp){
+                console.log("operation run!", resp);
+            })
+        }
+        */
         
 
 

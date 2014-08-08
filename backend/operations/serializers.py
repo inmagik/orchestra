@@ -8,6 +8,7 @@ class OperationSerializer(serializers.ModelSerializer):
     task_result = serializers.SerializerMethodField('get_task_result')
     task_state = serializers.SerializerMethodField('get_task_state')
     meta = serializers.SerializerMethodField('get_op_meta')
+    args_missing = serializers.Field(source='args_missing')
 
     def get_task_result(self, obj):
         if not obj.task:
@@ -32,7 +33,7 @@ class OperationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Operation
         fields = ('id', 'name', 'task', 'owner', 'task_result', 'task_state', 'args', 'meta',  'partials', 'oid',
-                'last_run', 'last_run_ok', 'last_exception')
+                'last_run', 'last_run_ok', 'last_exception', 'args_missing')
 
 
 

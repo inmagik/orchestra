@@ -51,6 +51,8 @@ class CreateOperation(APIView):
 
 
 class RunOperation(APIView):
+
+    permission_classes = (permissions.AllowAny,)
     
     def post(self, request, format=None):
         

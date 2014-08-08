@@ -80,6 +80,8 @@ class Workflow(models.Model):
         return out, missing
 
 
+
+
     def run(self, data={}, rerun=[]):
 
         ops = self.operations.all()
@@ -180,6 +182,13 @@ class Operation(models.Model):
         for x in meta['args']:
             out.append(args[x])
         return out
+
+    @property
+    def args_missing(self):
+        args = self.get_args()
+        args_missing = self.check_missing_args(args)
+        return args_missing
+
 
 
     def run(self, run_args={}):

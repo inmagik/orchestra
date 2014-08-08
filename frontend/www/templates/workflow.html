@@ -8,6 +8,50 @@
 
     <div class="row">
         <div class="col-sm-12">
+            <div class="panel panel-success" ng-class="{'panel-danger' : isPending(op.oid) }" ng-repeat="op in workflow.operations">
+                
+                <div class="panel-heading">
+                    {{op.name}} - {{op.oid}}
+                </div>
+                <div class="panel-body">
+                    <h4>Parameters</h4>
+                    <div ng-repeat="arg in op.meta.args">
+                        {{arg}}
+                    </div>
+
+                    <h4>Partials</h4>
+                    <div ng-repeat="arg in op.meta.args">
+                        {{ arg }} : {{ op.partials[arg] }}
+                    </div>
+
+                    <h4>Result</h4>
+                    <div class="well">
+                        state: {{ op.task_state || "No state" }} <br>
+                        args : {{op.args}} <br>
+                        <hr>
+                        Result: {{ op.task_result || "No result" }} <br>
+                        Started: {{ op.last_run || "No info" }} <br>
+                        Ended: {{ op.last_end || "No info" }} <br>
+
+
+                    </div>
+
+
+
+                    <div class="alert alert-danger" ng-if="op.args_missing.length">
+                        Missing args: {{op.args_missing}}
+                    </div>
+                    <div class="alert alert-info" ng-if="!op.args_missing.length && !op.task_state">
+                        <p>No missing args!</p>
+                        <button ng-click="runOperation(op.id)" class="btn btn-danger">Run operation</button> 
+                    </div>
+                    
+                </div>
+                <div class="panel-footer">
+                    <!--<button class="btn btn-danger">Run</button>-->
+                </div>
+            </div>
+            
             
         </div>
     </div>
