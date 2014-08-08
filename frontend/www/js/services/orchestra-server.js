@@ -10,22 +10,33 @@ angular.module('OrchestraServer', [])
     var svc = {};
     svc.baseUrl = "http://localhost:8000/"
 
-    svc.getMetaWorkflows = function(){
+    var simpleGet = function(url){
         var deferred = $q.defer();
-
-        var data = ["this", "is", "a", "test"];
-
-        console.log(data)
-
-        
-        var url = svc.baseUrl + "api/workflows/"
+        var url = svc.baseUrl + url;
         $http.get(url).then(function(resp){
             deferred.resolve(resp.data);
-        })
-
+            console.log("x", resp.data)
+        });
         return deferred.promise;
+    };
 
-    }
+    var simpleGetDrfList = function(url){
+        var deferred = $q.defer();
+        var url = svc.baseUrl + url;
+        $http.get(url).then(function(resp){
+            deferred.resolve(resp.data.results);
+            console.log("x", resp.data.results)
+        });
+        return deferred.promise;
+    };
+
+    svc.getMetaWorkflows = function(){
+        return simpleGet("api/metaworkflows/")
+    };
+
+    svc.getWorkflows = function(){
+        return simpleGetDrfList("api/workflows/")
+    };
 
 
     return svc;

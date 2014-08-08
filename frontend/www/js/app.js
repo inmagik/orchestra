@@ -37,6 +37,19 @@
           }
         })
 
+        .state('workflows', {
+          url: "/workflows",
+          templateUrl: "templates/workflows.html",
+          controller  :'WfCtrl',
+          //data : { requiresAuth : true},
+          resolve  : {
+            workflows : function(orchestraServer){
+              return orchestraServer.getWorkflows();
+            }
+
+          }
+        })
+
         .state('login', {
           url: "/login",
           templateUrl: "templates/login.html",

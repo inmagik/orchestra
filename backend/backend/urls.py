@@ -2,13 +2,16 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from rest_framework import routers
 from procrunner import views
+
 from operations.views import ListOperations, CreateOperation, RunOperation, OperationStatus
 from operations.views import ListWorkflows, CreateWorkflow, RunWorkflow, WorkflowStatus,ResetWorkflow
-
+from operations.views import WorkflowViewSet, OperationViewSet
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
+
+router.register(r'workflows', WorkflowViewSet)
 #router.register(r'self', views.CurrentUserView)
 
 
@@ -22,7 +25,7 @@ urlpatterns = patterns('',
     url(r'^api/ops/run/$', RunOperation.as_view(), name="run_operation"),
     url(r'^api/ops/status/(?P<pk>[0-9]+)/$', OperationStatus.as_view(), name="operation_status"),
 
-    url(r'^api/operations/', ListOperations.as_view(), name="operations"),
+    url(r'^api/metaoperations/', ListOperations.as_view(), name="operations"),
 
 
     url(r'^api/wf/create/$', CreateWorkflow.as_view(), name="create_workflow"),
@@ -35,7 +38,7 @@ urlpatterns = patterns('',
 
     url(r'^api/wf/status/(?P<pk>[0-9]+)/$', WorkflowStatus.as_view(), name="workflow_status"),    
     
-    url(r'^api/workflows/', ListWorkflows.as_view(), name="workflows"),
+    url(r'^api/metaworkflows/', ListWorkflows.as_view(), name="workflows"),
 
 
 

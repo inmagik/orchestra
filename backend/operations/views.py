@@ -177,3 +177,28 @@ class WorkflowStatus(APIView):
             raise APIException("Workflow not found")
 
         return  Response(WorkflowSerializer(op).data)
+
+
+
+
+from rest_framework import viewsets
+
+
+class WorkflowViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = Workflow.objects.all()
+    serializer_class = WorkflowSerializer
+    permission_classes = (permissions.AllowAny,)
+
+
+class OperationViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Operation.objects.all()
+    serializer_class = OperationSerializer
+    permission_classes = (permissions.AllowAny,)
+
+
