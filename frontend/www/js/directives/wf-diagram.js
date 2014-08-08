@@ -11,7 +11,7 @@
 
         _.each(ops, function(it){
 
-            var opNodeName = it.key || it.oid;
+            var opNodeName =  it.oid;
             
             var n = {name:opNodeName, op:it.name};
             nodes.push(n);

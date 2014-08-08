@@ -49,7 +49,7 @@ class ConnectedWorkflow(object):
                     out_partials[k] = partials[k]
 
             meta = op_register.meta[op.name]
-            op_data = {"name" : op.name, "key": op_key, "meta" : meta, "partials" : out_partials }
+            op_data = {"name" : op.name, "oid": op_key, "meta" : meta, "partials" : out_partials }
             out['operations'].append(op_data)
 
 
