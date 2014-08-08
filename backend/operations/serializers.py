@@ -7,7 +7,7 @@ class OperationSerializer(serializers.ModelSerializer):
 
     task_result = serializers.SerializerMethodField('get_task_result')
     task_state = serializers.SerializerMethodField('get_task_state')
-    expected_args = serializers.SerializerMethodField('get_expected_args')
+    meta = serializers.SerializerMethodField('get_op_meta')
 
     def get_task_result(self, obj):
         if not obj.task:
@@ -25,13 +25,13 @@ class OperationSerializer(serializers.ModelSerializer):
         except:
             return None
 
-    def get_expected_args(self, obj):
+    def get_op_meta(self, obj):
 
-        return register.meta[obj.name]['args']
+        return register.meta[obj.name]
 
     class Meta:
         model = Operation
-        fields = ('id', 'name', 'task', 'owner', 'task_result', 'task_state', 'args', 'expected_args',  'partials', 'oid',
+        fields = ('id', 'name', 'task', 'owner', 'task_result', 'task_state', 'args', 'meta',  'partials', 'oid',
                 'last_run', 'last_run_ok', 'last_exception')
 
 

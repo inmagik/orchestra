@@ -4,6 +4,7 @@ from operations.connectors import simple_celery_connector
 from celery import task
 from backend.celery import app
 import time
+from operations.utils import get_registered_op
 # Create your models here.
 
 
@@ -39,42 +40,37 @@ op_register.register_operation('import_to_postgres', import_to_postgres)
 
 
 
-def sum_and_mul(w):
+def sum_and_mul():
 
-    s_op = w.get_operation('sum')
-    s_op.partials = {"b" : 1, "a" : 10}
-    w.add_operation(s_op)
-
-    m_op = w.get_operation('mul')
-    m_op.partials = {"b" : 2}
-    w.add_operation(m_op)
-
-    conn = simple_celery_connector("a")
-    w.connect(s_op, m_op, conn)
-
-    m_op2 = w.get_operation('mul')
-    m_op2.partials = {"b" : 5}
-    w.add_operation(m_op2)
-
-    conn2 = simple_celery_connector("a")
-    w.connect(m_op, m_op2, conn)
+    s_op = get_registered_op('sum')
+    s_op.partials = {'b' : 1, 'a' : 10}
     
+    m_op = get_registered_op('mul')
+    m_op.partials = {'b' : 2}
     
 
+    m_op.connect_op(s_op, "a")
 
-
-
-def download_and_import(w):
-
-    d_op = w.get_operation('download_file')
-    w.add_operation(d_op)
-
-    i_op = w.get_operation('import_to_postgres')
-    w.add_operation(i_op)
     
-    conn = simple_celery_connector("filename")
-    w.connect(d_op, i_op, conn)
+    m_op2 = get_registered_op('mul')
+    m_op2.partials = {'a' : 5}
 
+    m_op2.connect_op(m_op, 'a')
+    
+
+    return [s_op, m_op, m_op2]
+    
+
+
+
+
+def download_and_import():
+
+    d_op = get_registered_op('download_file')
+    i_op = get_registered_op('import_to_postgres')
+    i_op.connect_op(d_op, 'filename')
+    
+    return [d_op, i_op]
 
     
 

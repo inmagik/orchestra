@@ -1,10 +1,19 @@
 import json
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import User
 from jsonfield import JSONField
+
+from celery.result import AsyncResult
+
+from backend.celery import app
+
 from orchestra_core.utils import generate_uuid, resolve_partial, reset_async_result
-#from .tasks import notify_success, notify_exception
 from orchestra_core import op_register, wf_register
+
+
+from .managers import WorkflowManager
 
 class Workflow(models.Model):
     
@@ -12,10 +21,37 @@ class Workflow(models.Model):
     name = models.CharField(max_length=200)
     oid = models.CharField(max_length=200, null=True, blank=True, default=generate_uuid)
 
+    objects = WorkflowManager()
+
 
     def reset(self):
         for op in self.operations.all():
             op.reset()
+
+
+    #TODO: not used
+    def get_meta(self):
+        out = {}
+        out['name'] = self.name
+        out['ops'] = []
+
+        for op in self.operations:
+            oid = op.oid
+            partials = op.partials or {}
+            out_partials = {}
+            for k in partials:
+                p = partials[k]
+                if type(p) == dict and 'backend' in p:
+                    out_partials[k] = { "source" : p['id'] }
+                else:
+                    out_partials[k] = partials[k]
+
+            meta = op_register.meta[op.name]
+            op_data = {"name" : op.name, "oid": oid, "meta" : meta, "partials" : out_partials }
+            out['ops'].append(op_data)
+
+
+        return out
 
 
     def get_runnable_ops(self, data={}, rerun=[]):
@@ -76,7 +112,7 @@ class Operation(models.Model):
 
 
     partials = JSONField(null=True, blank=True)
-    oid = models.CharField(max_length=200, null=True, blank=True)
+    oid = models.CharField(max_length=200, null=True, blank=True, default=generate_uuid)
 
     workflow = models.ForeignKey(Workflow, null=True, blank=True, related_name="operations")
 
@@ -86,6 +122,21 @@ class Operation(models.Model):
 
     last_run_ok = models.NullBooleanField(null=True, blank=True)
     last_exception = models.TextField(null=True, blank=True)
+
+
+
+    def connect_op(self,op, argname):
+        self.partials = self.partials or { }
+        self.partials[argname] = {
+            "source" : op.oid,
+            "backend" : 'celery'
+        }
+
+
+    def connect_value(self,value, argname):
+        self.partials = self.partials or { }
+        self.partials[argname] = value
+
 
 
     def get_meta(self):
@@ -98,7 +149,6 @@ class Operation(models.Model):
     def get_partial(self, name):
         try:
             partial = self.partials[name]
-            print "oo", partial
             value = resolve_partial(partial)
             return value
 
@@ -175,11 +225,8 @@ class Operation(models.Model):
 
 
 
+# NOTIFICATION TASKS FOR CELERY
 
-from celery import task
-from backend.celery import app
-import datetime
-from celery.result import AsyncResult
 
 @app.task()
 def notify_success(result, op_oid):

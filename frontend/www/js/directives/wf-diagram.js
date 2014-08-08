@@ -11,12 +11,14 @@
 
         _.each(ops, function(it){
 
-            var n = {name:it.key, op:it.name};
+            var opNodeName = it.key || it.oid;
+            
+            var n = {name:opNodeName, op:it.name};
             nodes.push(n);
 
-            var resultNode = {name:'result:'+it.key, op:'result'}
-            opsByKey[it.key] = n;
-            resByKey[it.key] = resultNode;
+            var resultNode = {name:'result:'+opNodeName, op:'result'}
+            opsByKey[opNodeName] = n;
+            resByKey[opNodeName] = resultNode;
 
             nodes.push(resultNode);                        
 
@@ -25,7 +27,7 @@
 
             var args = it.meta.args;
             _.each(args, function(arg){
-                var k = it.key+"_" + arg;
+                var k = opNodeName+"_" + arg;
                 var argNode = {name:arg, key:k, op:'arg', type:'arg'}
                 nodes.push(argNode);
                 links.push({source:argNode, target:n, type:'arglink'});
@@ -38,7 +40,7 @@
             var partials = it.partials;
             for(var x in partials){
                 var p = partials[x];
-                var ss = it.key + "_" + x;
+                var ss = opNodeName + "_" + x;
 
                 if (angular.isObject(p)){
                     if(p.source){
@@ -47,7 +49,7 @@
                     }
 
                 } else {
-                    var valueNode = { key: it.key+'_value_'+p, name:"value_"+p, op:'value', value:p };
+                    var valueNode = { key: opNodeName+'_value_'+p, name:"value_"+p, op:'value', value:p };
                     nodes.push(valueNode);
                     resByKey[valueNode.key] = valueNode;
                     deferredLinks.push({source:valueNode.key, target:ss,type:'valuelink'})
@@ -100,9 +102,12 @@
 
 
                     
-                    var nodesAndLinks = getNodesAndLinks(scope.metawf.ops);
+                    var nodesAndLinks = getNodesAndLinks(scope.metawf.operations);
                     var nodes = nodesAndLinks.nodes;
                     var links = nodesAndLinks.links;
+
+
+                    console.log("aaaar", nodesAndLinks)
                     
                     var $el = $(elem);
 

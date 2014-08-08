@@ -9,7 +9,7 @@ from rest_framework.exceptions import APIException
 from orchestra_core import op_register as register
 from orchestra_core import wf_register
 
-from operations.utils import run_workflow, get_workflow_meta, create_workflow
+from operations.utils import get_workflow_meta, create_registered_workflow
 
 from .serializers import OperationSerializer, WorkflowSerializer
 from .models import Operation, Workflow
@@ -162,7 +162,7 @@ class CreateWorkflow(APIView):
         if name not in wf_register.reg:
             raise APIException("The workflow %s is unknown" % name)            
 
-        wf = create_workflow(name=name, owner=request.user)
+        wf = create_registered_workflow(name=name, owner=request.user)
         
         return Response(WorkflowSerializer(wf).data)
 

@@ -1,6 +1,3 @@
-# TODO: this is a big mess!
-# USE A consistent api!
-
 import json
 
 from .models import Operation, Workflow
@@ -14,88 +11,30 @@ import datetime
 
 
 
-
-
 class ConnectedWorkflow(object):
+    """
+    This class is used only to get a worflow structure without saving anything to db
+    """
 
-    def __init__(self, name=None, oid=None, create_function=None):
+    def __init__(self, name=None, create_function=None):
         self.name = name
-        self.oid = oid or generate_uuid()
-        
-        self.ops = []
-        self.ops_ids = {}
+        self.ops = create_function()
+
         self.ops_names = {}
         self.ops_keys = {}
-
-        if create_function:
-            create_function(self)
-
-    def get_operation(self, name):
-        #op_fun = op_register.get_function(name)
-        op = Operation(name=name, oid=generate_uuid())
-        op.partials = {}
-        return op
-
-    def add_operation(self, op):
-        self.ops.append(op)
-        #TODO: check assigned ids
-        self.ops_ids[op.oid] = True
-        if op.name not in self.ops_names:
-
-            self.ops_names[op.name] = 0;
-        self.ops_names[op.name] += 1;
-
-        self.ops_keys[op.oid] = op.name + "_" + str(self.ops_names[op.name])
-
-
-    def connect(self, op1, op2, connector):
-        connector(op1,op2)
-
-
-    def save(self, **model_kwargs):
-        """
-        save all operations and the workflow
-        """
-        try:
-            workflow = Workflow.objects.get(oid=self.oid)
-        except Workflow.DoesNotExist:
-            workflow = Workflow(name=self.name, oid=self.oid, **model_kwargs)
-            workflow.save()
-
-        for op in self.ops:
-            op.workflow = workflow
-            op.owner = workflow.owner
-            op.save()
-
-        return workflow
-
-    def get_runnable_ops(self, data={}, rerun=[]):
-        out = []
-        missing = {}
-        for op in self.ops:
-            #filtering run operations
-            
-            if op.task and op.oid not in rerun:
-                continue
-
-            if op.oid in data:
-                op_data = data[op.oid]
-            else:
-                op_data = {}
-            x = missing_args(op, op_data)
-            
-            if not x:
-                out.append(op)
-            else:
-                missing[op.oid] = x
-
-        return out, missing
 
 
     def get_meta(self):
         out = {}
         out['name'] = self.name
-        out['ops'] = []
+        out['operations'] = []
+
+
+        for op in self.ops:
+            if op.name not in self.ops_names:
+                self.ops_names[op.name] = 0;
+            self.ops_names[op.name] += 1;
+            self.ops_keys[op.oid] = op.name + "_" + str(self.ops_names[op.name])
 
         for op in self.ops:
             op_key = self.ops_keys[op.oid]
@@ -104,54 +43,84 @@ class ConnectedWorkflow(object):
             for k in partials:
                 p = partials[k]
                 if type(p) == dict and 'backend' in p:
-                    op_name = self.ops_keys[p['id']]
+                    op_name = self.ops_keys[p['source']]
                     out_partials[k] = { "source" : op_name }
                 else:
                     out_partials[k] = partials[k]
 
             meta = op_register.meta[op.name]
             op_data = {"name" : op.name, "key": op_key, "meta" : meta, "partials" : out_partials }
-            out['ops'].append(op_data)
+            out['operations'].append(op_data)
 
 
         return out
 
 
 
-
-    def load(self):
-        wf = Workflow.objects.get(oid=self.oid)
-        self.ops = wf.operations.all()
-        self.name = wf.name
-        return wf
+def get_registered_op(name):
+    meta = op_register.get_meta(name)
+    return Operation(name=name)
 
 
+
+def create_workflow(name, ops_list, links_list=[], owner=None):
+
+    wf = Workflow(name=name, owner=owner)
+    wf.save()
+
+    oids_to_ops = {}
+    for op in ops_list:
+        op.workflow = wf
+        oids_to_ops[op.oid] = op
+        
+    
+
+    #must build partials...
+    for link in links_list:
+
+        if 'target_arg' not in link:
+            raise ValueError("no target arg in link!", link)
+
+        target_op = link['target_op']
+        target_op.partials = target_op.partials or { }
+
+        target_arg = link['target_arg']
+
+        if 'value' in link:
+            target_op.partials[target_arg] = link['value']
+
+
+        if 'source_op' in link:
+            target_op.partials[target_arg] = {
+                'id' : link['source_op'].oid,
+                'backend' : 'celery'
+            }
+
+    
+    for op in ops_list:
+        op.save()
+
+    return wf
+
+
+
+
+
+def create_registered_workflow(name, owner=None):
+    wf_fun = wf_register.get_function(name)
+    ops_list = wf_fun()
+    return create_workflow(name, ops_list, owner=None)
+
+
+    
 def get_workflow_meta(name):
     wf_fun = wf_register.get_function(name)
     w = ConnectedWorkflow(name=name, create_function=wf_fun)
     return w.get_meta()
     
+    
+    
 
 
-def create_workflow(name, **model_kwargs):
-    """
-    get workflow from register and created associated operations
-    chaining them via partial args
-    """
-
-    wf_fun = wf_register.get_function(name)
-    w = ConnectedWorkflow(name=name, create_function=wf_fun)
-    out = w.save(**model_kwargs)
-    return out
-
-
-
-def load_workflow(wf_id):
-    """
-   
-    """
-    w = ConnectedWorkflow(oid=wf_id)
-    w.load()
-    return w
 
 

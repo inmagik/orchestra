@@ -51,6 +51,6 @@ def resolve_partial(partial):
         if 'backend' not in partial:
             raise ValueError('Backend not specified in partial')
         if partial['backend'] == 'celery':
-            return get_async_result(partial['id'])
+            return get_async_result(partial['source'])
             
     return partial
