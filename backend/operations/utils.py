@@ -5,22 +5,14 @@ import json
 
 from .models import Operation, Workflow
 from orchestra_core import op_register, wf_register
-from orchestra_core.utils import get_async_result, reset_async_result, generate_uuid, revoke_if_running, get_async_state
+from orchestra_core.utils import get_async_result, reset_async_result, generate_uuid, revoke_if_running, get_async_state, resolve_partial
 from rest_framework.exceptions import APIException
 from celery.result import AsyncResult
 from celery.task.control import revoke
-from .tasks import notify_success, notify_exception
+from .models import notify_success, notify_exception
 import datetime
 
-def resolve_partial(partial):
-    if type(partial) == dict:
 
-        if 'backend' not in partial:
-            raise ValueError('Backend not specified in partial')
-        if partial['backend'] == 'celery':
-            return get_async_result(partial['id'])
-            
-    return partial
 
 
 def get_args_for_op(meta, data, partials):
@@ -55,49 +47,6 @@ def missing_args(op, data={}):
     return args_not_found
 
 
-
-
-def run_operation(op, data):
-    """
-    runs an operation (stored in db)
-    """
-    #let's check arguments
-    meta = op_register.meta[op.name]
-    args = []
-    args_not_found = []
-    
-    partials = op.partials or {}
-
-    
-
-
-    args, args_not_found = get_args_for_op(meta, data, partials)
-    
-
-    if args_not_found:
-        raise APIException("Missing arguments, %s" % ','.join(args_not_found))    
-
-    if(op.task):
-        #revoke_if_running(op.task)
-        reset_async_result(op.task)
-
-
-    task = op_register.reg[op.name]
-    run_args = {'args' : args}
-    
-    
-    
-    res = task.apply_async(args, task_id = op.oid, 
-            link=notify_success.s(op.oid),
-            link_error= notify_exception.s(op.oid))
-
-    task_id = res.task_id
-    op.last_run = datetime.datetime.now()
-    op.task = task_id
-    op.args = json.dumps(run_args)
-    op.save()
-
-    return op
 
 
 
@@ -260,7 +209,7 @@ def run_workflow(wf, data={}, rerun=[]):
     if rops:
         for r in rops:
             op_data = data.get(r.oid,{})
-            run_operation(r, op_data)
+            r.run(op_data)
             run_ops.append(r.oid)
 
     return {"just_run" : run_ops, "missing_args" : missing, "previously_run" : xops}

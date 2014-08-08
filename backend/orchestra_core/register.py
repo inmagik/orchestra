@@ -22,7 +22,17 @@ class OperationRegister(object):
 
     
     def get_function(self, name):
+        """
+        deprecated use get_task
+        """
         return self.reg[name]
+
+    def get_task(self, name):
+        return self.reg[name]
+
+
+    def get_meta(self, name):
+        return self.meta[name]
 
 
 

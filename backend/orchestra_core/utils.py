@@ -45,3 +45,12 @@ def get_async_state(id, backend="celery"):
     return None    
 
 
+def resolve_partial(partial):
+    if type(partial) == dict:
+
+        if 'backend' not in partial:
+            raise ValueError('Backend not specified in partial')
+        if partial['backend'] == 'celery':
+            return get_async_result(partial['id'])
+            
+    return partial
