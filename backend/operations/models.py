@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from jsonfield import JSONField
 from orchestra_core.utils import generate_uuid
 
-# Create your models here.
 
 class Workflow(models.Model):
     
@@ -18,9 +17,10 @@ class Operation(models.Model):
     """
     owner = models.ForeignKey(User, null=True, blank=True)
     name = models.CharField(max_length=200)
+    
+    #current task
     task = models.CharField(max_length=200, null=True, blank=True)
     args = JSONField(null=True, blank=True)
-
 
 
     partials = JSONField(null=True, blank=True)
@@ -30,6 +30,8 @@ class Operation(models.Model):
 
     #execution data
     last_run = models.DateTimeField(null=True, blank=True)
+    last_end = models.DateTimeField(null=True, blank=True)
+    
     last_run_ok = models.NullBooleanField(null=True, blank=True)
     last_exception = models.TextField(null=True, blank=True)
 

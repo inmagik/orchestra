@@ -10,7 +10,7 @@ from rest_framework.exceptions import APIException
 from celery.result import AsyncResult
 from celery.task.control import revoke
 from .tasks import notify_success, notify_exception
-
+import datetime
 
 def resolve_partial(partial):
     if type(partial) == dict:
@@ -85,12 +85,14 @@ def run_operation(op, data):
     task = op_register.reg[op.name]
     run_args = {'args' : args}
     
+    
+    
     res = task.apply_async(args, task_id = op.oid, 
             link=notify_success.s(op.oid),
             link_error= notify_exception.s(op.oid))
 
-    
     task_id = res.task_id
+    op.last_run = datetime.datetime.now()
     op.task = task_id
     op.args = json.dumps(run_args)
     op.save()
