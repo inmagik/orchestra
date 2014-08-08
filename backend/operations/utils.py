@@ -9,42 +9,7 @@ from orchestra_core.utils import get_async_result, reset_async_result, generate_
 from rest_framework.exceptions import APIException
 from celery.result import AsyncResult
 from celery.task.control import revoke
-from .models import notify_success, notify_exception
 import datetime
-
-
-
-
-def get_args_for_op(meta, data, partials):
-    args = []
-    args_not_found = []
-    for arg in meta['args']:
-        if arg not in data:
-            
-            if arg in partials:
-                p = partials[arg]
-                
-                try:
-                    res = resolve_partial(partials[arg])
-                    args.append(res)
-                except:
-                    args_not_found.append(arg)
-
-            else:
-                args_not_found.append(arg)
-
-        else:
-            args.append(data[arg])
-
-    return args, args_not_found
-
-
-def missing_args(op, data={}):
-    meta = op_register.meta[op.name]
-    partials = op.partials or {}
-    args, args_not_found = get_args_for_op(meta, data, partials)
-
-    return args_not_found
 
 
 
@@ -189,53 +154,4 @@ def load_workflow(wf_id):
     w.load()
     return w
 
-
-def reset_workflow(wf_id):
-    """
-   
-    """
-
-    w = ConnectedWorkflow(oid=wf_id)
-    wf = w.load()
-
-
-
-def run_workflow(wf, data={}, rerun=[]):
-    w = ConnectedWorkflow(oid=wf.oid)
-    wf = w.load()
-    rops, missing = w.get_runnable_ops(data, rerun=rerun)
-    xops = [x.oid for x in w.ops if x.task and x.oid not in rerun]
-    run_ops = []
-    if rops:
-        for r in rops:
-            op_data = data.get(r.oid,{})
-            r.run(op_data)
-            run_ops.append(r.oid)
-
-    return {"just_run" : run_ops, "missing_args" : missing, "previously_run" : xops}
-
-
-
-
-def reset_workflow(wf):
-    ops = wf.operations.all()
-    for op in ops:
-        if op.task:
-            res = AsyncResult(op.task)
-            if res.state != 'PENDING':
-                res.forget()
-
-            if res.state == 'PENDING':
-                op.task = None
-
-        
-        op.save()
-
-
-
-
-
-
-
-    
 

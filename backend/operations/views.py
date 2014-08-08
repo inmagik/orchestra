@@ -9,7 +9,7 @@ from rest_framework.exceptions import APIException
 from orchestra_core import op_register as register
 from orchestra_core import wf_register
 
-from operations.utils import run_operation, run_workflow, get_workflow_meta, create_workflow, reset_workflow
+from operations.utils import run_workflow, get_workflow_meta, create_workflow
 
 from .serializers import OperationSerializer, WorkflowSerializer
 from .models import Operation, Workflow
@@ -65,7 +65,7 @@ class RunOperation(APIView):
         if op.task and not force:
             raise APIException("This operation has already run")
         
-        run_operation(op, request.DATA)
+        op.run(request.DATA)
         
         return Response(OperationSerializer(op).data)
 
@@ -125,7 +125,7 @@ class RunWorkflow (APIView):
             raise APIException("No valid WorkFlow found")
 
         
-        run_ops = run_workflow(wf, data, rerun=rerun)
+        run_ops = wf.run(data, rerun=rerun)
         
         return Response(run_ops)
 
@@ -144,8 +144,7 @@ class ResetWorkflow (APIView):
         except Exception, e:
             raise APIException("No valid WorkFlow found")
 
-        
-        reset_workflow(wf)
+        wf.reset()
         
         return Response(WorkflowSerializer(wf).data)
 

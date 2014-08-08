@@ -1,4 +1,6 @@
 redis_bin/*
 redis_build/*
 *.rdb
+*.sqlite3
+*.sqlite
 

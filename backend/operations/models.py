@@ -14,7 +14,53 @@ class Workflow(models.Model):
 
 
     def reset(self):
-        pass
+        for op in self.operations.all():
+            op.reset()
+
+
+    def get_runnable_ops(self, data={}, rerun=[]):
+        out = []
+        missing = {}
+        for op in self.operations.all():
+            #filtering run operations
+            
+            if op.task and op.oid not in rerun:
+                continue
+
+            if op.oid in data:
+                op_data = data[op.oid]
+            else:
+                op_data = {}
+            
+            op_args = op.get_args()
+            op_args.update(op_data)
+            x = op.check_missing_args(op_args)
+            
+            if not x:
+                out.append(op)
+            else:
+                missing[op.oid] = x
+
+        return out, missing
+
+
+    def run(self, data={}, rerun=[]):
+
+        ops = self.operations.all()
+        rops, missing = self.get_runnable_ops(data=data, rerun=rerun)
+        
+        xops = [x.oid for x in ops if x.task and x.oid not in rerun]
+        
+        run_ops = []
+        if rops:
+            for r in rops:
+                op_data = data.get(r.oid,{})
+                r.run(op_data)
+                run_ops.append(r.oid)
+
+        return {"just_run" : run_ops, "missing_args" : missing, "previously_run" : xops}
+
+
 
 
 class Operation(models.Model):
@@ -116,9 +162,14 @@ class Operation(models.Model):
 
 
 
-
     def reset(self):
-        pass
+        if self.task:
+            res = AsyncResult(self.task)
+            if res.state != 'PENDING':
+                res.forget()
+                self.task = None
+
+        self.save()
 
 
 
