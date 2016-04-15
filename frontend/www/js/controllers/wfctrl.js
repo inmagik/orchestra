@@ -43,8 +43,8 @@ angular.module('Orchestra')
 
     }])
 
-.controller('WfCtrlSingle', ['$scope', 'workflow', 'orchestraServer',
-    function($scope, workflow, orchestraServer) {
+.controller('WfCtrlSingle', ['$rootScope', '$scope', 'workflow', 'orchestraServer', '$timeout', '$interval',
+    function($rootScope, $scope, workflow, orchestraServer, $timeout, $interval) {
 
         $scope.workflow = workflow;
         console.log("xxx", workflow)
@@ -67,6 +67,46 @@ angular.module('Orchestra')
             })
         }
         */
+
+        $scope.refresh = function(){
+            orchestraServer.getWorkflow($scope.workflow.oid)
+            .then(function(data){
+                $timeout(function(){
+                    $scope.workflow = data;    
+                })
+                
+            })
+        }
+
+        var interval = $interval($scope.refresh, 3000);
+
+        $scope.$on("$destroy", function() {
+            if (interval) {
+                $interval.cancel(interval);
+            }
+        });
+
+        $scope.$watch('workflow.operations', function(nv,ov){
+            var oo = {}, on = {}
+
+            _.each(nv, function(item){
+                on[item.oid] = item.task_state;
+            })
+            _.each(ov, function(item){
+                oo[item.oid] = item.task_state;
+            })
+            console.log("xxx", nv.operat, oo, on)
+            for(var x in on){
+                if(oo[x] != on[x]){
+                    if(on[x] == 'SUCCESS'){
+                        $rootScope.$broadcast('opsuccess', x);    
+                    }
+                    
+                }
+            }
+
+
+        }, true);
         
 
 

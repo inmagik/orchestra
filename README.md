@@ -1,4 +1,4 @@
-Orchestra is a client/server web application for managing data processing workflows.
+	Orchestra is a client/server web application for managing data processing workflows.
 
 The application may rougly be split in two components:
 

@@ -16,7 +16,7 @@
             var n = {name:opNodeName, op:it.name};
             nodes.push(n);
 
-            var resultNode = {name:'result:'+opNodeName, op:'result'}
+            var resultNode = {name:'result:'+opNodeName, op:'result', state:it.task_state, oid:it.oid}
             opsByKey[opNodeName] = n;
             resByKey[opNodeName] = resultNode;
 
@@ -132,7 +132,7 @@
 
                             return 100;
                         })
-                        .charge(-300)
+                        .charge(-400)
                         .on("tick", tick)
                         .start();
 
@@ -140,27 +140,37 @@
                         .attr("width", width)
                         .attr("height", height);
 
-
+                    var link;
+                    var node;
                         
-
-                    var link = svg.selectAll(".link")
-                        .data(force.links())
-                        .enter().append("line")
+                    function start(){
+                        link = svg.selectAll(".link")
+                        .data(force.links());
+                        
+                        link.enter().append("line")
                         .attr("class", "link");
 
+                        link.exit().remove();
 
-                    var node = svg.selectAll(".node")
-                        .data(force.nodes())
-                        .enter().append("g")
+
+                        node = svg.selectAll(".node")
+                        .data(force.nodes());
+
+                    
+                        node
+                        .enter()
+                        .append("g")
                         .attr("class", "node")
                         //.on("mouseover", mouseover)
                         //.on("mouseout", mouseout)
-                        .call(force.drag);
+                        .call(force.drag)
 
-                    node.append("circle")
+                        node.append("circle")
                         .classed("result", function(d){ return d.op=='result'})
+                        .classed("success", function(d){ return d.state=='SUCCESS'})
                         .classed("value", function(d){ return d.op=='value'})
                         .classed("arg", function(d){ return d.op=='arg'})
+                        .attr("id", function(d){ return d.oid })
                         .attr("r", function(d){
                             if(d.op == 'result'){
                                 return 12;
@@ -176,7 +186,7 @@
                             .attr("x", 12)
                             .attr("dy", ".35em")
                             .text(function(d) { return d.name; });
-
+                    }    
 
                     
 
@@ -189,6 +199,18 @@
                         node
                           .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
                     }
+
+                    start();
+
+                    $rootScope.$on('opsuccess', 
+                        function(evt, data){
+                            console.log('opsuccess', data);
+                            $("#"+data)
+                                .addClass('success');
+                                start();
+
+                        }
+                    );
 
                     
                   

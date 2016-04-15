@@ -116,6 +116,7 @@
           if(next.data.requiresAuth){
             if (!DrfAuthService.isAuthenticated()) {
               // user is not allowed
+              console.log(1)
               event.preventDefault();
               $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
             }
