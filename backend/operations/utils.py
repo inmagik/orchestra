@@ -1,14 +1,6 @@
-import json
+from orchestra_core import op_register, wf_register
 
 from .models import Operation, Workflow
-from orchestra_core import op_register, wf_register
-from orchestra_core.utils import get_async_result, reset_async_result, generate_uuid, revoke_if_running, get_async_state, resolve_partial
-from rest_framework.exceptions import APIException
-from celery.result import AsyncResult
-from celery.task.control import revoke
-import datetime
-
-
 
 
 class ConnectedWorkflow(object):
@@ -22,7 +14,6 @@ class ConnectedWorkflow(object):
 
         self.ops_names = {}
         self.ops_keys = {}
-
 
     def get_meta(self):
         out = {}
@@ -52,15 +43,12 @@ class ConnectedWorkflow(object):
             op_data = {"name" : op.name, "oid": op_key, "meta" : meta, "partials" : out_partials }
             out['operations'].append(op_data)
 
-
         return out
-
 
 
 def get_registered_op(name):
     meta = op_register.get_meta(name)
     return Operation(name=name)
-
 
 
 def create_workflow(name, ops_list, links_list=[], owner=None):
@@ -72,8 +60,6 @@ def create_workflow(name, ops_list, links_list=[], owner=None):
     for op in ops_list:
         op.workflow = wf
         oids_to_ops[op.oid] = op
-        
-    
 
     #must build partials...
     for link in links_list:
@@ -103,16 +89,12 @@ def create_workflow(name, ops_list, links_list=[], owner=None):
     return wf
 
 
-
-
-
 def create_registered_workflow(name, owner=None):
     wf_fun = wf_register.get_function(name)
     ops_list = wf_fun()
     return create_workflow(name, ops_list, owner=None)
 
 
-    
 def get_workflow_meta(name):
     wf_fun = wf_register.get_function(name)
     w = ConnectedWorkflow(name=name, create_function=wf_fun)
