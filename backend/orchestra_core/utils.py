@@ -1,7 +1,9 @@
 import uuid
 
-from celery.result import AsyncResult
 from celery.task.control import revoke
+
+from celery.result import AsyncResult
+
 
 def generate_uuid():
     return str(uuid.uuid1())
@@ -27,7 +29,6 @@ def revoke_if_running(task_id):
         pass
 
 
-
 def get_async_result(id, backend="celery"):
     if backend == 'celery':
         res = AsyncResult(id)
@@ -35,14 +36,14 @@ def get_async_result(id, backend="celery"):
             return res.get()
 
     raise ValueError("no result")
-    
+
 
 def get_async_state(id, backend="celery"):
     if backend == 'celery':
         res = AsyncResult(id)
         return res.state
 
-    return None    
+    return None
 
 
 def resolve_partial(partial):
@@ -52,5 +53,5 @@ def resolve_partial(partial):
             raise ValueError('Backend not specified in partial')
         if partial['backend'] == 'celery':
             return get_async_result(partial['source'])
-            
+
     return partial
